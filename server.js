@@ -1,22 +1,25 @@
+const routes = require('./routes');
+const http = require('http');
+const express = require('express');
+const socketIO = require('socket.io');
+const cors = require('cors')
 
-const express = require("express");
+const app = express();
+app.use(cors)
+app.use('/', routes);
+const server = http.createServer(app);
+const io = socketIO(server);
 
-const path = require("path");
+io.on('connection', (socket) => {
+  console.log('Client connected to Socket.IO server!');
 
-const app = express()
+  socket.on('disconnect', () => {
+    console.log('Client disconnected from Socket.IO server!');
+  });
+});
 
-const server = require('http').createServer(app)
+server.listen(3000, () => {
+  console.log('Socket.IO server listening on port 3000!');
+});
 
-const io = require('socket.io')(server)
 
-
-app.use(express.static(path.join(__dirname, 'public')))
-app.set('views', path.join(__dirname, 'public'))
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
-
-app.use('/', (req, res) => {
-  res.render('index.hml');
-})
-
-server.listen(3000)
